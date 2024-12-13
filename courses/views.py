@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Course
-from .forms import CourseForm
+from .models import *
+from .forms import *
 
 def course_list(request):
     courses = Course.objects.all()
@@ -8,7 +8,16 @@ def course_list(request):
 
 def course_detail(request, id):
     course = get_object_or_404(Course, id=id)
-    return render(request, 'course_detail.html', {'course': course})
+
+    if request.method == 'POST':
+        form = StudentForm(request.POST)
+        if form.is_valid():
+            student = form.save(commit=False)
+            student.post = course
+            student.save()
+            return redirect('course_detail', id=id)
+
+    return render(request, 'course_detail.html', context ={'course': course, 'form': StudentForm()})
 
 def course_create(request):
     if request.method == 'POST':
